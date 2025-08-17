@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1090
+set -euo pipefail
+
+# Load .env variables
+set -a
+[ -f ../.env ] && source ../.env
+set +a
+
+# Ensure APP_NAME and APP_ENV are set
+if [[ -z "$APP_NAME" || -z "$APP_ENV" ]]; then
+  echo "❌ APP_NAME or APP_ENV is not set. Please define both in .env or pass as env vars."
+  exit 1
+fi
+
+# Normalize and sanitize names
+APP_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-' | sed 's/^-*//;s/-*$//')
+APP_ENV=$(echo "$APP_ENV" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-' | sed 's/^-*//;s/-*$//')
+
+# If any component is still empty, exit
+if [[ -z "$APP_NAME" || -z "$APP_ENV" ]]; then
+  echo "❌ APP_NAME or APP_ENV became empty after sanitization. Please use valid values (letters/numbers/hyphens)."
+  exit 1
+fi
+
+PROJECT_NAME="${APP_NAME}-${APP_ENV}"
+echo "📦 Using Docker project: ${PROJECT_NAME}"
+
+# Determine docker compose command
+if docker compose version > /dev/null 2>&1; then
+  DOCKER_COMPOSE="docker compose"
+else
+  DOCKER_COMPOSE="docker-compose"
+fi
+
+COMPOSE_FILES=("docker-compose.yml")
+
+# Flags to determine which files to include
+INCLUDE_DEV=true
+INCLUDE_EXTRAS=true
+
+# Parse args and remove handled flags
+CLEAN_ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --prod) INCLUDE_DEV=false ;;
+    --no-extras) INCLUDE_EXTRAS=false ;;
+    *) CLEAN_ARGS+=("$arg") ;;
+  esac
+done
+
+# Conditionally add additional compose files
+if [ "$INCLUDE_DEV" = true ]; then
+  COMPOSE_FILES+=("docker-compose.dev.yml")
+else
+  COMPOSE_FILES+=("docker-compose.network.yml")
+fi
+if [ "$INCLUDE_EXTRAS" = true ]; then
+  COMPOSE_FILES+=("docker-compose.extras.yml")
+fi
+
+# Prefix files with -f for docker compose
+COMPOSE_FILES_PREFIXED=()
+for file in "${COMPOSE_FILES[@]}"; do
+  COMPOSE_FILES_PREFIXED+=("-f" "$file")
+done
+
+# Run docker compose with custom project name
+${DOCKER_COMPOSE} --env-file ../.env -p "${PROJECT_NAME}" "${COMPOSE_FILES_PREFIXED[@]}" "${CLEAN_ARGS[@]}"

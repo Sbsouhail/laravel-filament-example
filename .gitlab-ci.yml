@@ -1,0 +1,56 @@
+stages:
+  - deploy
+
+deploy_production:
+  stage: deploy
+  only:
+    - production
+  script:
+    # Ensure SSH client is available
+    - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
+
+    # Start SSH agent and add private key
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+
+    # Add your VPS to known hosts
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+    # SSH into the VPS and deploy
+    - |
+      ssh "$SERVER_USER@$SERVER_HOST" <<EOF
+      cd "$PRODUCTION_DEPLOY_PATH/docker"
+      git pull origin production
+      ./bin/up --prod
+      ./bin/deploy --no-dev --prod
+      ./bin/restart --prod
+      docker system prune -f
+      EOF
+
+deploy_dev:
+  stage: deploy
+  only:
+    - main
+  script:
+    # Ensure SSH client is available
+    - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
+
+    # Start SSH agent and add private key
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+
+    # Add your VPS to known hosts
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+    # SSH into the VPS and deploy
+    - |
+      ssh "$SERVER_USER@$SERVER_HOST" <<EOF
+      cd "$DEV_DEPLOY_PATH/docker"
+      git pull origin main
+      ./bin/up --prod
+      ./bin/deploy --no-dev --prod
+      ./bin/restart --prod
+      docker system prune -f
+      EOF

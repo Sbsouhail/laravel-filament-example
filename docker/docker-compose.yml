@@ -1,0 +1,14 @@
+services:
+  app:
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        APP_ENV: ${APP_ENV:-production}
+        # SERVER_NAME: ${SERVER_NAME:-:80}
+    user: "appuser"
+    networks:
+      - web
+networks:
+  web:

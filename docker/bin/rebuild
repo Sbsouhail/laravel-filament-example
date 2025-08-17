@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+bin/docker-compose down
+UID=$(id -u) GID=$(id -g) bin/docker-compose "$@" up -d --build
+

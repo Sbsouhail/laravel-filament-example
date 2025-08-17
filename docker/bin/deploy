@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+if [ "$1" == "--no-dev" ]; then
+  bin/composer install --no-dev 
+else
+  bin/composer install  
+fi
+bin/composer clear-cache
+bin/artisan migrate --force
+bin/pnpm i
+bin/pnpm build
+bin/artisan optimize
+bin/artisan config:cache
+bin/artisan route:cache
+bin/artisan icons:cache

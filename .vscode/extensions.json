@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "emeraldwalk.runonsave",
+        "sanderronde.phpstan-vscode",
+        "bmewburn.vscode-intelephense-client",
+        "mehedidracula.php-namespace-resolver",
+        "absszero.vscode-laravel-goto"
+    ]
+}

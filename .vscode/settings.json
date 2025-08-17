@@ -1,0 +1,39 @@
+{
+    "emeraldwalk.runonsave": {
+        "autoClearConsole": true,
+        "commands": [
+            {
+                "cmd": "cd docker && bin/pint-format ${relativeFile}",
+                "match": ".*.php"
+            },
+            {
+                "cmd": "cd docker && bin/ide-generate",
+                "match": "(database/migrations/.*.php|app/Models/.*.php)"
+            }
+        ]
+    },
+    "editor.formatOnSave": false,
+    "phpstan.singleFileMode": true,
+    "phpstan.binPath": "vendor/bin/phpstan",
+    "phpstan.binCommand": [],
+    "phpstan.configFile": "phpstan.neon",
+    "phpstan.paths": {
+        "": "/app"
+    },
+    "phpstan.dockerContainerName": "coupons-local-app-1",
+    "phpstan.rootDir": "",
+    "phpstan.options": [],
+    "phpstan.enableStatusBar": true,
+    "phpstan.memoryLimit": "2048M",
+    "phpstan.enabled": true,
+    "phpstan.projectTimeout": 300000,
+    "phpstan.timeout": 300000,
+    "phpstan.suppressTimeoutMessage": false,
+    "phpstan.showProgress": false,
+    "phpstan.showTypeOnHover": false,
+    "phpstan.ignoreErrors": ["Xdebug: .*"],
+    "phpstan.suppressWorkspaceMessage": false,
+    "phpstan.pro": false,
+    "phpstan.tmpDir": "",
+    "phpstan.checkValidity": false
+}

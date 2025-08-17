@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+bin/composer create-project laravel/laravel new
+bin/cli rm -R new/.env new/.env.example new/.gitignore new/README.md
+bin/cli cp -R new/. .
+bin/cli rm -R new

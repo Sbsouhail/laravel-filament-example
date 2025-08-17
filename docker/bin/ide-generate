@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+bin/artisan ide-helper:generate
+bin/artisan ide-helper:models --nowrite
